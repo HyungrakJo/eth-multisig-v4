@@ -18,7 +18,11 @@ contract UpdatedForwarderFactory is CloneFactory {
     implementationAddress = _implementationAddress;
   }
 
-  function createForwarder(address parent, address feeAddress, bytes32 salt) external {
+  function createForwarder(
+    address parent,
+    address feeAddress,
+    bytes32 salt
+  ) external {
     this.createForwarder(parent, feeAddress, salt, true, true);
   }
 

@@ -24,17 +24,17 @@ contract UpdatedForwarder is IERC721Receiver, ERC1155Receiver, IForwarder {
   /**
    * Initialize the contract, and sets the destination address to that of the parent address
    */
-  function init (
+  function init(
     address _parentAddress,
     address _feeAddress,
     bool _autoFlush721,
     bool _autoFlush1155
   ) external onlyUninitialized {
-    require(_parentAddress !=  address(0x0), "Invalid address");
+    require(_parentAddress != address(0x0), 'Invalid address');
     parentAddress = _parentAddress;
-    require(_feeAddress !=  address(0x0), "Invalid address");
+    require(_feeAddress != address(0x0), 'Invalid address');
     feeAddress = _feeAddress;
-  
+
     uint256 value = address(this).balance;
 
     // set whether we want to automatically flush erc721/erc1155 tokens or not
@@ -58,15 +58,18 @@ contract UpdatedForwarder is IERC721Receiver, ERC1155Receiver, IForwarder {
   /**
    * Modifier that will execute internal code block only if the sender is from the allowed addresses
    */
-  modifier onlyAllowedAddress {
-    require(msg.sender == parentAddress || msg.sender == feeAddress, 'Address is not allowed');
+  modifier onlyAllowedAddress() {
+    require(
+      msg.sender == parentAddress || msg.sender == feeAddress,
+      'Address is not allowed'
+    );
     _;
   }
 
   /**
    * Modifier that will execute internal code block only if the contract has not been initialized yet
    */
-  modifier onlyUninitialized {
+  modifier onlyUninitialized() {
     require(parentAddress == address(0x0), 'Already initialized');
     _;
   }
@@ -319,9 +322,9 @@ contract UpdatedForwarder is IERC721Receiver, ERC1155Receiver, IForwarder {
    */
   function supportsInterface(bytes4 interfaceId)
     public
+    view
     virtual
     override(ERC1155Receiver, IERC165)
-    view
     returns (bool)
   {
     return
