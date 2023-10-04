@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.10;
+pragma solidity 0.8.15;
 import '../IForwarder.sol';
 
 /** ERC721, ERC1155 imports */
