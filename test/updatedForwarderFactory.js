@@ -36,17 +36,18 @@ const createForwarder = async (
   salt,
   shouldAutoFlushERC721 = true,
   shouldAutoFlushERC1155 = true,
-  sender
+  sender,
 ) => {
   const inputSalt = util.setLengthLeft(
     Buffer.from(util.stripHexPrefix(salt), 'hex'),
     32
   );
-  console.log('inputSalt', inputSalt);
+  
   const calculationSalt = abi.soliditySHA3(
     ['address', 'bytes32'],
     [parent, inputSalt]
   );
+
   const initCode = helpers.getInitCode(
     util.stripHexPrefix(implementationAddress)
   );
@@ -62,15 +63,12 @@ const createForwarder = async (
     inputSalt,
     shouldAutoFlushERC721,
     shouldAutoFlushERC1155,
-    {
-      from: sender
-    }
   );
 
   return forwarderAddress;
 };
 
-describe('ForwarderFactory', function () {
+describe('UpdatedForwarderFactory', function () {
   let accounts;
   before(async () => {
     await hre.network.provider.send('hardhat_reset');
@@ -109,170 +107,186 @@ describe('ForwarderFactory', function () {
     endForwarderBalance.eq(startForwarderBalance).should.be.true();
   });
 
-  //   it('Different salt should create at different addresses', async function () {
-  //     const { factory, implementationAddress } = await createForwarderFactory();
+  it('Different salt should create forwarders at different addresses', async function () {
+    const { factory, implementationAddress } = await createForwarderFactory();
 
-  //     const parent = accounts[0];
-  //     const salt = '0x1234';
-  //     const forwarderAddress = await createForwarder(
-  //       factory,
-  //       implementationAddress,
-  //       parent,
-  //       salt,
-  //       undefined,
-  //       undefined,
-  //       accounts[1]
-  //     );
+    const parent = accounts[0];
+    const feeAddress = accounts[2];
+    const salt = '0x1234';
+    const forwarderAddress = await createForwarder(
+      factory,
+      implementationAddress,
+      parent,
+      feeAddress,
+      salt,
+      undefined,
+      undefined,
+      accounts[1]
+    );
 
-  //     const salt2 = '0x12345678';
-  //     const forwarderAddress2 = await createForwarder(
-  //       factory,
-  //       implementationAddress,
-  //       parent,
-  //       salt2,
-  //       undefined,
-  //       undefined,
-  //       accounts[1]
-  //     );
+    const salt2 = '0x12345678';
+    const forwarderAddress2 = await createForwarder(
+      factory,
+      implementationAddress,
+      parent,
+      feeAddress,
+      salt2,
+      undefined,
+      undefined,
+      accounts[1]
+    );
 
-  //     forwarderAddress.should.not.equal(forwarderAddress2);
-  //   });
+    forwarderAddress.should.not.equal(forwarderAddress2);
+  }); 
 
-  //   it('Different creators should create at different addresses', async function () {
-  //     const { factory, implementationAddress } = await createForwarderFactory();
-  //     const { factory: factory2, implementationAddress: implementationAddress2 } =
-  //       await createForwarderFactory();
+  it('Different creators should create forwarders at different addresses', async function () {
+    const { factory, implementationAddress } = await createForwarderFactory();
+    const { factory: factory2, implementationAddress: implementationAddress2 } =
+      await createForwarderFactory();
 
-  //     const parent = accounts[0];
-  //     const salt = '0x1234';
-  //     const forwarderAddress = await createForwarder(
-  //       factory,
-  //       implementationAddress,
-  //       parent,
-  //       salt,
-  //       undefined,
-  //       undefined,
-  //       accounts[1]
-  //     );
-  //     const forwarderAddress2 = await createForwarder(
-  //       factory2,
-  //       implementationAddress2,
-  //       parent,
-  //       salt,
-  //       undefined,
-  //       undefined,
-  //       accounts[1]
-  //     );
+    const parent = accounts[0];
+    const feeAddress = accounts[2];
+    const salt = '0x1234';
+    const forwarderAddress = await createForwarder(
+      factory,
+      implementationAddress,
+      parent,
+      feeAddress,
+      salt,
+      undefined,
+      undefined,
+      accounts[1]
+    );
+    const forwarderAddress2 = await createForwarder(
+      factory2,
+      implementationAddress2,
+      parent,
+      feeAddress,
+      salt,
+      undefined,
+      undefined,
+      accounts[1]
+    );
 
-  //     forwarderAddress.should.not.equal(forwarderAddress2);
-  //   });
+    forwarderAddress.should.not.equal(forwarderAddress2);
+  }); 
 
-  //   it('Different parents should create at different addresses', async function () {
-  //     const { factory, implementationAddress } = await createForwarderFactory();
+  it('Different parents should create forwarders at different addresses', async function () {
+    const { factory, implementationAddress } = await createForwarderFactory();
 
-  //     const parent = accounts[0];
-  //     const salt = '0x1234';
-  //     const forwarderAddress = await createForwarder(
-  //       factory,
-  //       implementationAddress,
-  //       parent,
-  //       salt,
-  //       undefined,
-  //       undefined,
-  //       accounts[1]
-  //     );
+    const parent = accounts[0];
+    const feeAddress = accounts[2];
+    const salt = '0x1234';
+    const forwarderAddress = await createForwarder(
+      factory,
+      implementationAddress,
+      parent,
+      feeAddress,
+      salt,
+      undefined,
+      undefined,
+      accounts[1]
+    );
 
-  //     const parent2 = accounts[1];
-  //     const forwarderAddress2 = await createForwarder(
-  //       factory,
-  //       implementationAddress,
-  //       parent2,
-  //       salt,
-  //       undefined,
-  //       undefined,
-  //       accounts[1]
-  //     );
+    const parent2 = accounts[1];
+    const forwarderAddress2 = await createForwarder(
+      factory,
+      implementationAddress,
+      parent2,
+      feeAddress,
+      salt,
+      undefined,
+      undefined,
+      accounts[1]
+    );
 
-  //     forwarderAddress.should.not.equal(forwarderAddress2);
-  //   });
+    forwarderAddress.should.not.equal(forwarderAddress2);
+  });
 
-  //   [
-  //     [true, 'true'],
-  //     [false, 'false']
-  //   ].map(([shouldAutoFlush, label]) => {
-  //     it(`should assign the create a forwarder with ${label} autoflush721 params`, async () => {
-  //       const { factory, implementationAddress } = await createForwarderFactory();
+  [
+    [true, 'true'],
+    [false, 'false']
+  ].map(([shouldAutoFlush, label]) => {
+    it(`should assign the create a forwarder with ${label} autoflush721 params`, async () => {
+      const { factory, implementationAddress } = await createForwarderFactory();
 
-  //       const parent = accounts[0];
-  //       const salt = '0x1234';
-  //       const forwarderAddress = await createForwarder(
-  //         factory,
-  //         implementationAddress,
-  //         parent,
-  //         salt,
-  //         shouldAutoFlush,
-  //         undefined,
-  //         accounts[1]
-  //       );
+      const parent = accounts[0];
+      const feeAddress = accounts[2];
+      const salt = '0x1234';
+      const forwarderAddress = await createForwarder(
+        factory,
+        implementationAddress,
+        parent,
+        feeAddress,
+        salt,
+        shouldAutoFlush,
+        undefined,
+        accounts[1]
+      );
 
-  //       const forwarderContract = await hre.ethers.getContractAt(
-  //         'Forwarder',
-  //         forwarderAddress
-  //       );
-  //       const autoFlush721 = await forwarderContract.autoFlush721();
+      const forwarderContract = await hre.ethers.getContractAt(
+        'Forwarder',
+        forwarderAddress
+      );
+      const autoFlush721 = await forwarderContract.autoFlush721();
 
-  //       autoFlush721.should.equal(shouldAutoFlush);
-  //     });
+      autoFlush721.should.equal(shouldAutoFlush);
+    }); 
 
-  //     it(`should assign the create a forwarder with ${label} autoflush1155 params`, async () => {
-  //       const { factory, implementationAddress } = await createForwarderFactory();
+    it(`should assign the create a forwarder with ${label} autoflush1155 params`, async () => {
+        const { factory, implementationAddress } = await createForwarderFactory();
 
-  //       const parent = accounts[0];
-  //       const salt = '0x1234';
-  //       const forwarderAddress = await createForwarder(
-  //         factory,
-  //         implementationAddress,
-  //         parent,
-  //         salt,
-  //         undefined,
-  //         shouldAutoFlush,
-  //         accounts[1]
-  //       );
+        const parent = accounts[0];
+        const feeAddress = accounts[2];
+        const salt = '0x1234';
+        const forwarderAddress = await createForwarder(
+          factory,
+          implementationAddress,
+          parent,
+          feeAddress,
+          salt,
+          undefined,
+          shouldAutoFlush,
+          accounts[1]
+        );
 
-  //       const forwarderContract = await hre.ethers.getContractAt(
-  //         'Forwarder',
-  //         forwarderAddress
-  //       );
-  //       const autoFlush1155 = await forwarderContract.autoFlush1155();
-  //       autoFlush1155.should.equal(shouldAutoFlush);
-  //     });
-  //   });
+        const forwarderContract = await hre.ethers.getContractAt(
+          'Forwarder',
+          forwarderAddress
+        );
+        const autoFlush1155 = await forwarderContract.autoFlush1155();
+        autoFlush1155.should.equal(shouldAutoFlush);
+      });
+    });  
 
-  //   it('Should fail to create two contracts with the same inputs', async function () {
-  //     const { factory, implementationAddress } = await createForwarderFactory();
+    it('Should fail to create two contracts with the same inputs', async function () {
+      const { factory, implementationAddress } = await createForwarderFactory();
 
-  //     const parent = accounts[0];
-  //     const salt = '0x1234';
-  //     const forwarderAddress = await createForwarder(
-  //       factory,
-  //       implementationAddress,
-  //       parent,
-  //       salt,
-  //       undefined,
-  //       undefined,
-  //       accounts[1]
-  //     );
-  //     await helpers.assertVMException(
-  //       async () =>
-  //         await createForwarder(
-  //           factory,
-  //           implementationAddress,
-  //           parent,
-  //           salt,
-  //           undefined,
-  //           undefined,
-  //           accounts[1]
-  //         )
-  //     );
-  //   });
+      const parent = accounts[0];
+      const feeAddress = accounts[2];
+      const salt = '0x1234';
+      const forwarderAddress = await createForwarder(
+        factory,
+        implementationAddress,
+        parent,
+        feeAddress,
+        salt,
+        undefined,
+        undefined,
+        accounts[1]
+      );
+      await helpers.assertVMException(
+        async () =>
+          await createForwarder(
+            factory,
+            implementationAddress,
+            parent,
+            feeAddress,
+            salt,
+            undefined,
+            undefined,
+            accounts[1]
+          )
+      );
+    });
 });
